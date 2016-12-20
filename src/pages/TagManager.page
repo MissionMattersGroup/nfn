@@ -1,0 +1,45 @@
+<apex:page showHeader="true" StandardController="Tag__c" extensions="TagManagerController" sidebar="true">
+        <link href="/sCSS/17.0/1247146914000/PortalDefault/00D80000000azBu/0608000000020Nv/portal.css" media="handheld,print,projection,screen,tty,tv" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"/>
+        <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+        <script>
+                $(function() {
+                        $( document ).tooltip();
+                });
+        </script>
+
+        <apex:form >
+                <apex:pageBlock id="TagBlock">
+
+                        <div style="margin:0 auto;text-align:center;width:100%;">
+                                <p><apex:outputText value="{!parentName}" style="font-size:2.5em;font-weight:bold;"/></p>
+
+                                <p><apex:commandButton action="{!save}" value="Save"/></p>
+
+                                <p>
+                                        <a href="#" style="text-decoration:none;" title="Enter 3 or more characters to begin filtering.">
+                                                <apex:outputLabel style="font-weight:bold;" for="FilterStringInput" value="Filter Tags: "/>
+                                                <apex:inputText id="FilterStringInput" value="{!filterString}">
+                                                        <apex:actionSupport event="onkeyup" action="{!updateRenderedTagMap}" rerender="TagList" />
+                                                </apex:inputText>
+                                        </a>
+                                        <apex:commandButton action="{!clearFilter}" value="Clear Filter"/>
+                                </p>
+                        </div>
+
+                        <apex:pageBlockSection id="TagList">
+                                <apex:repeat value="{!masterTagMap}" var="tagName">
+                                        <apex:inputCheckbox value="{!masterTagMap[tagName].isChecked}" label="{!tagName}" rendered="{!tagRenderedMap[tagName]}"/>
+                                </apex:repeat>
+                        </apex:pageBlockSection>
+
+                        <div style="margin:0 auto;text-align:center;width:100%;">
+                                <p><apex:commandButton action="{!save}" value="Save"/></p>
+                        </div>
+
+                </apex:pageBlock>
+        </apex:form>
+
+</apex:page>
