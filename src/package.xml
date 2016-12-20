@@ -6,6 +6,7 @@
 		<members>TagManagerController</members>
 		<members>UnsupportedObjectTypeException</members>
 		<members>TagManagerTest</members>
+		<members>QueryUtility</members>
 		<name>ApexClass</name>
 	</types>
 	<types>
