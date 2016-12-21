@@ -7,10 +7,13 @@
 		<members>UnsupportedObjectTypeException</members>
 		<members>TagManagerTest</members>
 		<members>QueryUtility</members>
+		<members>ObjectConversionController</members>
+		<members>ObjectConversionTest</members>
 		<name>ApexClass</name>
 	</types>
 	<types>
 		<members>TagManager</members>
+		<members>ObjectConversion</members>
 		<name>ApexPage</name>
 	</types>
 	<version>36.0</version>
