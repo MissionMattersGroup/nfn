@@ -30,7 +30,7 @@ public with sharing class TagManagerController {
         masterTagMap = new Map<String, TempTag>();
         existingTagMap = new Map<String, Tag__c>();
         tagRenderedMap = new Map<String, Boolean>();
-        for(Tag_Value__c tag : [SELECT Id, Name FROM Tag_Value__c]) {
+        for(Tag_Value__c tag : [SELECT Id, Name FROM Tag_Value__c WHERE RecordType.Name = :ApexPages.CurrentPage().getParameters().get('rt')]) {
             TempTag tt = new TempTag(tag);
             masterTagMap.put(tag.Name, tt);
             tagRenderedMap.put(tag.Name, true);
