@@ -1,0 +1,122 @@
+<apex:page title="Referral Processing" showHeader="false" docType="html-5.0" controller="IntakeController">
+	<apex:stylesheet value="{!URLFOR($Resource.jqueryui)}"/>
+	<apex:includeScript value="{!URLFOR($Resource.jqueryjs)}"/>
+	<apex:includeScript value="{!URLFOR($Resource.jqueryuijs)}"/>
+	<vs:importvisualstrap />
+	<style>
+		.minimized {
+			height: 1px;
+			visibility: hidden;
+		}
+		body{
+			font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+		}
+		.intro{
+			margin-top:20px;
+			font-size:140%;
+			font-weight: 200;
+		}
+	</style>
+	<vs:visualstrapblock >
+		<apex:form id="processingform">
+			<!--header -->
+			<vs:navbar brand="Referral Processing" inverse="true" type="fixed-top">{!orgName}</vs:navbar>
+
+			<!-- page 0 (required data missing from Referral record) -->
+			<apex:outputPanel rendered="{!pageDisplayMap[0]}">
+				<apex:outputPanel layout="block" styleClass="container">
+					<apex:outputPanel layout="block" styleClass="row center-block">
+						<apex:outputPanel layout="block" styleClass="col-md-2"></apex:outputPanel>
+						<apex:outputPanel layout="block" styleClass="col-md-8 well text-center">
+							<h1 style="text-align:center;margin-bottom:30px;">Referral Process<br/></h1>
+							<ul style="text-align:left;margin-top:30px;">
+								<li style="list-style-type:none;"><h4><vs:glyph icon="circle-arrow-right"/> &nbsp; Provide Missing Data on Referral Record</h4></li>
+								<li style="list-style-type:none;"><h4><vs:glyph icon="unchecked"/> &nbsp; Create Client/Guardian Contacts, and Household Account</h4></li>
+								<li style="list-style-type:none;"><h4><vs:glyph icon="unchecked"/> &nbsp; Refer Services</h4></li>
+								<li style="list-style-type:none;"><h4><vs:glyph icon="unchecked"/> &nbsp; Confirm</h4></li>
+							</ul>
+						</apex:outputPanel>
+						<apex:outputPanel layout="block" styleClass="col-md-2"></apex:outputPanel>
+					</apex:outputPanel>
+				</apex:outputPanel>
+				<apex:outputPanel layout="block" styleClass="container">
+					<apex:outputPanel layout="block" styleClass="row center-block">
+						<apex:outputPanel layout="block" styleClass="col-md-2"></apex:outputPanel>
+						<apex:outputPanel layout="block" styleClass="col-md-8 well text-center">
+							<h3 style="text-align:center;margin-bottom:30px;">The following fields on the Referral record are required</h3>
+							<div style="margin-top:30px;text-align:left;">
+								<vs:formblock alignment="horizontal">
+									<apex:repeat value="{!missingFieldDisplayOrderList}" var="displayOrder">
+										<vs:formgroup >
+											<vs:column type="col-xs-1"></vs:column>
+											<vs:column type="col-md-5">
+	            								<h4><apex:outputLabel style="vertical-align:middle;font-weight:normal;margin-top:3px;" for="{!$Component.MissingField}">{!missingSourceFieldMap[missingSourceFieldByDisplayOrderMap[displayOrder]]}</apex:outputLabel></h4>
+	        								</vs:column>
+									        <vs:column type="col-md-5">
+												<apex:inputField id="MissingField" styleClass="form-control" label="{!missingSourceFieldByDisplayOrderMap[displayOrder]}" value="{!referral[missingSourceFieldByDisplayOrderMap[displayOrder]]}"/>
+									        </vs:column>
+										</vs:formgroup>
+									</apex:repeat>
+									<vs:column type="col-lg-1"></vs:column>
+									<vs:column style="text-align:center;" type="col-lg-6">
+										<apex:commandButton value="Update Referral Record" styleClass="btn btn-large btn-success" action="{!updateReferral}"/>
+									</vs:column>
+									<vs:column style="text-align:center;" type="col-lg-3">
+										<apex:commandButton value="Cancel" styleClass="btn btn-large btn-warning" action="{!cancel}"/>
+									</vs:column>
+							</vs:formblock>
+							</div>
+						</apex:outputPanel>
+						<apex:outputPanel layout="block" styleClass="col-md-2"></apex:outputPanel>
+					</apex:outputPanel>
+				</apex:outputPanel>
+			</apex:outputPanel>
+			<!-- page 1 -->
+			<apex:outputPanel rendered="{!pageDisplayMap[1]}">
+				<apex:outputPanel layout="block" styleClass="container">
+					<apex:outputPanel layout="block" styleClass="row center-block">
+						<apex:outputPanel layout="block" styleClass="col-md-2"></apex:outputPanel>
+						<apex:outputPanel layout="block" styleClass="col-md-8 well text-center">
+							<h1 style="text-align:center;margin-bottom:30px;">Referral Process<br/></h1>
+							<ul style="text-align:left;margin-top:30px;">
+								<li style="list-style-type:none;"><h4><span style="color:green;"><vs:glyph icon="check"/></span> &nbsp; Referral Record Complete</h4></li>
+								<li style="list-style-type:none;"><h4><vs:glyph icon="circle-arrow-right"/> &nbsp; Create Client Contacts, and Infact Case</h4></li>
+								<li style="list-style-type:none;"><h4><vs:glyph icon="unchecked"/> &nbsp; Confirm</h4></li>
+							</ul>
+						</apex:outputPanel>
+						<apex:outputPanel layout="block" styleClass="col-md-2"></apex:outputPanel>
+					</apex:outputPanel>
+				</apex:outputPanel>
+				<apex:outputPanel layout="block" styleClass="container center-block">
+					<apex:outputPanel layout="block" styleClass="row">
+						<apex:outputPanel layout="block" styleClass="col-md-12 text-center">
+							<input type="button" class="btn btn-lg btn-primary" style="margin-right:15px;" data-toggle="modal" data-target="#ConfirmReferral" value="Process Referral"/>
+							<apex:commandButton styleClass="btn-lg btn-warning" style="margin-left:15px;" action="{!cancel}" value="Cancel"/>
+						</apex:outputPanel>
+					</apex:outputPanel>
+				</apex:outputPanel>
+			</apex:outputPanel>
+
+			<!-- footer -->
+			<vs:navbar brand="Easterseals - Midwest" inverse="true" type="fixed-bottom" layout="none">
+			 	<center>
+				   	<apex:outputPanel styleClass="text-muted" style="margin:20px;font-size:130%" layout="block">
+			     		<vs:glyph icon="bullhorn"/> {!orgName}
+				   	</apex:outputPanel>
+			 	</center>
+			</vs:navbar>
+			<!-- page 1 confirm modal-->
+			<vs:modal title="Process Referral Record" id="ConfirmReferral">
+				<apex:actionRegion id="ConfirmReferralRegion">
+					<apex:pageBlock mode="maindetail">
+			   			<p>Are you sure you would like to create {!referral.Client_First_Name__c} {!referral.Client_Last_Name__c} as a client?</p>
+				 	</apex:pageBlock>
+				 	<apex:outputPanel styleClass="modal-footer" layout="block">
+			   			<apex:commandButton value="Close" styleClass="btn-warning" html-data-dismiss="modal"/>
+						<apex:commandButton value="Process Referral" styleClass="btn-primary" html-data-dismiss="modal" action="{!processReferral}" rerender="processingform"/>
+					</apex:outputPanel>
+				</apex:actionRegion>
+			</vs:modal>
+		</apex:form>
+	</vs:visualstrapblock>
+ </apex:page>
