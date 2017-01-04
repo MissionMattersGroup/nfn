@@ -6,14 +6,15 @@ global class IntakeController {
 	global Map<String, String> missingSourceFieldMap { get; set; }
 	global List<Integer> missingFieldDisplayOrderList { get; set; }
 	global Referral__c referral { get; set; }
-	private String retUrl { get; set; }
+	global String retUrl { get; set; }
     global Map<Integer, Boolean> pageDisplayMap { get; set; }
     global Contact client { get; set; }
-	global Account household { get; set; }
 	global Case__c nfnCase { get; set; }
     global Boolean hasError { get; set; }
 	global Boolean hasMissingSourceData { get; set; }
     global String orgName { get; set; }
+    global String returnTo { get; set; }
+    global String baseurl { get { return Url.getSalesforceBaseUrl().toExternalForm(); } }
 
     class TargetObject {
 		public String sobjectType { get; set; }
@@ -82,28 +83,29 @@ global class IntakeController {
 		}
 	}
 
-    global void processReferral() {
+    global PageReference processReferral() {
         List<SObject> newSObjectList = new List<SObject>();
         for(Integer orderKey : targetObjectMap.keySet()) newSObjectList.add(targetObjectMap.get(orderKey).assignValues());
         insert newSObjectList;
-        List<Contact> contactList = new List<Contact>();
-        Id clientId;
         for(SObject so : newSObjectList) {
-            if(String.valueOf(so.Id).startsWith('003')) {
-                if(Schema.SObjectType.Contact.getRecordTypeInfosById().get(String.valueOf(so.get('RecordTypeId'))).getName() == 'Client') {
-                    contactList.add((Contact)so);
-                    client = (Contact)so;
-					retUrl = '/' + client.Id;
-                }
-            } else if(String.valueOf(so.Id).startsWith('001')) {
-                household = (Account)so;
+            if(so instanceof Contact) {
+                client = (Contact)so;
+				retUrl = '/' + client.Id;
+                referral.Client__c = client.Id;
+            } else if (so instanceof Case__c) {
+                nfnCase = (Case__c)so;
+                referral.Case__c = nfnCase.Id;
             }
         }
+        update referral;
+        pageDisplayMap.put(1, false);
+        pageDisplayMap.put(2, true);
+        return null;
     }
 
-    global PageReference save() {
-        hasError = false;
-        return null;
+    @RemoteAction
+    global static PageReference goto(String returnTo) {
+        return new PageReference('/' + returnTo);
     }
 
     global PageReference cancel() {
@@ -112,7 +114,7 @@ global class IntakeController {
 
 	private void evaluateConversion() {
 		Map<Integer, String> soNameMap = new Map<Integer, String>();
-        String ocQuery = 'SELECT Required__c, Display_Order__c, Source_Object_API_Name__c, Target_Object_API_Name__c, Source_Field__c, Source_Field_API_Name__c, Target_Field_API_Name__c, Target_Value__c, Order__c FROM Object_Conversion__c WHERE Recordtype.Name = \'referral Processing\' ORDER BY Order__c';
+        String ocQuery = 'SELECT Required__c, Display_Order__c, Source_Object_API_Name__c, Target_Object_API_Name__c, Source_Field__c, Source_Field_API_Name__c, Target_Field_API_Name__c, Target_Value__c, Order__c FROM Object_Conversion__c WHERE Recordtype.Name = \'Intake Process\' ORDER BY Order__c';
         for(Object_Conversion__c oc : (List<Object_Conversion__c>)Database.query(ocQuery)) {
             Integer orderKey = Integer.valueOf(oc.Order__c);
             Map<String, Object> valueByFieldMap = fieldValueMapByOrderKeyMap.containsKey(orderKey) ? fieldValueMapByOrderKeyMap.get(orderKey) : new Map<String, Object>();
