@@ -9,6 +9,8 @@
 		<members>QueryUtility</members>
 		<members>ObjectConversionController</members>
 		<members>ObjectConversionTest</members>
+		<members>AddressLookupService</members>
+		<members>AddressLookupServiceTest</members>
 		<name>ApexClass</name>
 	</types>
 	<types>
