@@ -8,7 +8,7 @@ global class IntakeController {
 	global Referral__c referral { get; set; }
 	global String retUrl { get; set; }
     global Map<Integer, Boolean> pageDisplayMap { get; set; }
-    global Contact client { get; set; }
+    global Contact caregiver { get; set; }
 	global Case__c nfnCase { get; set; }
     global Boolean hasError { get; set; }
 	global Boolean hasMissingSourceData { get; set; }
@@ -53,16 +53,16 @@ global class IntakeController {
         targetObjectMap = new Map<Integer, TargetObject>();
         fieldValueMapByOrderKeyMap = new Map<Integer, Map<String, Object>>();
 		if(ApexPages.currentPage().getParameters().containsKey('ContactId')) {
-			client = [SELECT Id, Name, FirstName, LastName, AccountId FROM Contact WHERE Id = :ApexPages.currentPage().getParameters().get('ContactId')];
-			retUrl = '/' + client.Id;
-			referral = Database.query(QueryUtility.getSelectStarQuery('Referral__c') + ' WHERE Client__c = \'' + client.Id + '\'');
+			caregiver = [SELECT Id, Name, FirstName, LastName, AccountId FROM Contact WHERE Id = :ApexPages.currentPage().getParameters().get('ContactId')];
+			retUrl = '/' + caregiver.Id;
+			referral = Database.query(QueryUtility.getSelectStarQuery('Referral__c') + ' WHERE Caregiver__c = \'' + caregiver.Id + '\'');
 			updatePageDisplayMap(2);
         } else {
             referral = Database.query(QueryUtility.getSelectStarQuery('Referral__c') + ' WHERE Id = \'' + ApexPages.currentPage().getParameters().get('id') + '\'');
             retUrl = '/' + referral.Id;
-            if(String.isNotBlank(String.valueOf(referral.get('Client__c')))) {
-                client = [SELECT Id, FirstName, LastName, Name, AccountId FROM Contact WHERE Id = :String.valueOf(referral.get('Client__c'))];
-                retUrl = '/' + client.Id;
+            if(String.isNotBlank(String.valueOf(referral.get('Caregiver__c')))) {
+                caregiver = [SELECT Id, FirstName, LastName, Name, AccountId FROM Contact WHERE Id = :String.valueOf(referral.get('Caregiver__c'))];
+                retUrl = '/' + caregiver.Id;
             }
             evaluateConversion();
         }
@@ -89,9 +89,9 @@ global class IntakeController {
         insert newSObjectList;
         for(SObject so : newSObjectList) {
             if(so instanceof Contact) {
-                client = (Contact)so;
-				retUrl = '/' + client.Id;
-                referral.Client__c = client.Id;
+                caregiver = (Contact)so;
+				retUrl = '/' + caregiver.Id;
+                referral.Caregiver__c = caregiver.Id;
             } else if (so instanceof Case__c) {
                 nfnCase = (Case__c)so;
                 referral.Case__c = nfnCase.Id;
@@ -145,7 +145,7 @@ global class IntakeController {
 			for(Integer orderKey : fieldValueMapByOrderKeyMap.keySet()) {
 				targetObjectMap.put(orderKey, new TargetObject(soNameMap.get(orderKey), gd.get(soNameMap.get(orderKey)), fieldValueMapByOrderKeyMap.get(orderKey)));
 			}
-			updatePageDisplayMap((String.isBlank(String.valueOf(referral.get('Client__c'))) ? 1 : 2));
+			updatePageDisplayMap((String.isBlank(String.valueOf(referral.get('Caregiver__c'))) ? 1 : 2));
         }
 	}
 
