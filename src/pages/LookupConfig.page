@@ -1,0 +1,96 @@
+<apex:page title="Address Lookup Configuration" showHeader="false" docType="html-5.0" standardController="Address_Lookup_Configuration__c" extensions="LookupConfigController">
+	<apex:stylesheet value="{!URLFOR($Resource.jqueryui)}"/>
+	<apex:includeScript value="{!URLFOR($Resource.jqueryjs)}"/>
+	<apex:includeScript value="{!URLFOR($Resource.jqueryuijs)}"/>
+	<vs:importvisualstrap />
+	<style>
+		.minimized {
+			height: 1px;
+			visibility: hidden;
+		}
+		body{
+			font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+		}
+		.intro{
+			margin-top:20px;
+			font-size:140%;
+			font-weight: 200;
+		}
+		.top-vert {
+			margin-top: 16px;
+		}
+	</style>
+	<apex:pageBlock >
+	<apex:pageMessages />
+	<vs:visualstrapblock >
+			<apex:form id="formatAddressLookupFields">
+				<!--header -->
+				<vs:navbar brand="Address Lookup Configuration" inverse="true" type="fixed-top">{!orgName}</vs:navbar>
+
+				<apex:outputPanel >
+					<apex:outputPanel layout="block" styleClass="container">
+						<apex:outputPanel layout="block" styleClass="row center-block" id="form-container">
+							<apex:outputPanel layout="block" styleClass="col-md-4"></apex:outputPanel>
+							<apex:outputPanel layout="block" styleClass="col-md-4 well">
+								<apex:outputPanel id="object-section">
+									<apex:outputLabel styleClass="top-vert" value="Which object would you like to configure?" for="object-name"/>
+									<apex:selectList styleClass="form-control btm-vert" value="{!addressLookup.Object_Name__c}" multiselect="false" size="1" id="object-name">
+										<apex:selectOptions value="{!objectList}"/>
+										<apex:actionSupport event="onchange" reRender="form-container" action="{!populateFieldLists}"/>
+									</apex:selectList>
+								</apex:outputPanel>
+								<apex:outputPanel rendered="{!addressLookup.Object_Name__c != ''}" id="county-section">
+									<apex:outputLabel styleClass="top-vert" value="Which field is the County field?" for="county_field"/>
+									<apex:selectList styleClass="form-control" value="{!addressLookup.County_Field__c}" multiselect="false" size="1" id="county_field">
+										<apex:selectOptions value="{!countyFieldList}"/>
+										<apex:actionSupport event="onchange" reRender="form-container" action="{!rerender}"/>
+									</apex:selectList>
+								</apex:outputPanel>
+								<apex:outputPanel rendered="{!addressLookup.County_Field__c != ''}" id="street-section">
+									<apex:outputLabel styleClass="top-vert" value="Which field is the Street Address field? " for="street_address_field"/>
+									<apex:selectList styleClass="form-control" value="{!addressLookup.Street_Address_Field__c}" multiselect="false" size="1" id="street_address_field">
+										<apex:selectOptions value="{!streetfieldList}"/>
+										<apex:actionSupport event="onchange" reRender="form-container" action="{!rerender}"/>
+									</apex:selectList>
+								</apex:outputPanel>
+								<apex:outputPanel rendered="{!addressLookup.Street_Address_Field__c != ''}" id="city-section">
+									<apex:outputLabel styleClass="top-vert" value="Which field is the City field? " for="city_field"/>
+									<apex:selectList styleClass="form-control" value="{!addressLookup.City_Field__c}" multiselect="false" size="1" id="city_field">
+										<apex:selectOptions value="{!cityFieldList}"/>
+										<apex:actionSupport event="onchange" reRender="form-container" action="{!rerender}"/>
+									</apex:selectList>
+								</apex:outputPanel>
+								<apex:outputPanel rendered="{!addressLookup.City_Field__c != ''}" id="state-section">
+									<apex:outputLabel styleClass="top-vert" value="Which field is the State field? " for="state_field"/>
+									<apex:selectList styleClass="form-control" value="{!addressLookup.State_Field__c}" multiselect="false" size="1" id="state_field">
+										<apex:selectOptions value="{!stateFieldList}"/>
+										<apex:actionSupport event="onchange" reRender="form-container" action="{!rerender}"/>
+									</apex:selectList>
+								</apex:outputPanel>
+								<apex:outputPanel rendered="{!addressLookup.State_Field__c != ''}" id="postal-code-section">
+									<apex:outputLabel styleClass="top-vert" value="Which field is the Postal/Zip Code field? " for="postal-field"/>
+									<apex:selectList styleClass="form-control" value="{!addressLookup.Postal_Code_Field__c}" multiselect="false" size="1" id="postal-field">
+										<apex:selectOptions value="{!postalFieldList}"/>
+										<apex:actionSupport event="onchange" reRender="form-container" action="{!rerender}"/>
+									</apex:selectList>
+								</apex:outputPanel>
+								<apex:outputPanel rendered="{!addressLookup.Postal_Code_Field__c != ''}" id="button-section" styleClass="row">
+									<apex:outputPanel styleClass="col-lg-3"></apex:outputPanel>
+									<apex:outputPanel styleClass="col-lg-2">
+										<apex:commandButton styleClass="btn-success top-vert" value="Save" action="{!save}"/>
+									</apex:outputPanel>
+									<apex:outputPanel styleClass="col-lg-2"></apex:outputPanel>
+									<apex:outputPanel styleClass="col-lg-2">
+										<apex:commandButton styleClass="btn-warning top-vert" value="Cancel" action="{!cancel}"/>
+									</apex:outputPanel>
+									<apex:outputPanel styleClass="col-lg-3"></apex:outputPanel>
+								</apex:outputPanel>
+							<apex:outputPanel layout="block" styleClass="col-md-4"></apex:outputPanel>
+						</apex:outputPanel>
+					</apex:outputPanel>
+				</apex:outputPanel>
+			</apex:outputPanel>
+		</apex:form>
+	</vs:visualstrapblock>
+	</apex:pageBlock>
+</apex:page>

@@ -44,25 +44,23 @@ public class ObjectConversionController {
 		List<String> sortedLabelList = new List<String>(objectNameByLabelMap.keySet());
 		sortedLabelList.sort();
 		for(String label : sortedLabelList) {
-			sourceObjectList.add(new SelectOption(objectNameByLabelMap.get(label), label));
-			// targetObjectList.add(new SelectOption(objectNameByLabelMap.get(label), label));
+			sourceObjectList.add(new SelectOption(label, label));
+			targetObjectList.add(new SelectOption(label, label));
 		}
 	}
 
 	public void populateTargetFieldList() {
 		fieldMapByObjectNameMap = new Map<String, Map<String, SObjectField>>();
 		if(String.isNotBlank(oc.Target_Object__c) && oc.Target_Object__c != '0') {
-			Schema.SObjectType soType = sObjectByLabelMap.get(oc.Target_Object__c);
-			fieldMapByObjectNameMap.put(oc.Target_Object__c, soType.getDescribe().fields.getMap());
-			Map<String, SObjectField> fieldMap = fieldMapByObjectNameMap.get(oc.Target_Object__c);
+			fieldMapByObjectNameMap.put(oc.Target_Object__c, sObjectByLabelMap.get(oc.Target_Object__c).getDescribe().fields.getMap());
 			targetFieldList = new List<SelectOption>{new SelectOption('0', '--Select--')};
-			targetFieldList.addAll(sortFieldList(soType.getDescribe().fields.getMap()));
+			targetFieldList.addAll(sortFieldList(fieldMapByObjectNameMap.get(oc.Target_Object__c)));
 			renderProvidedValueByFieldMap = new Map<String, Boolean>();
 			requiredFieldMap = new Map<String, String>();
-			for(String fieldApiName : fieldMap.keySet()) {
+			for(String fieldApiName : fieldMapByObjectNameMap.get(oc.Target_Object__c).keySet()) {
 				defaultTargetValueMap.put(fieldApiName, '0');
 				renderProvidedValueByFieldMap.put(fieldApiName, false);
-				Schema.DescribeFieldResult dfr = fieldMap.get(fieldApiName).getDescribe();
+				Schema.DescribeFieldResult dfr = fieldMapByObjectNameMap.get(oc.Target_Object__c).get(fieldApiName).getDescribe();
 				if(!dfr.isDefaultedOnCreate()) requiredFieldMap.put(fieldApiName, dfr.getLabel());
 			}
 		}
@@ -96,17 +94,21 @@ public class ObjectConversionController {
 		}
 	}
 
+	public PageReference cancel() {
+		return new PageReference(EncodingUtil.urlDecode(ApexPages.CurrentPage().getParameters().get('retUrl'), 'UTF-8'));
+	}
+
 	public PageReference saveAndNew() {
 		populateAPIFields();
 		insert oc;
 		oc = new Object_Conversion__c();
-		return new PageReference('/apex/ObjectConversion');
+		return new PageReference('/apex/ObjectConversion?retUrl=' + ApexPages.CurrentPage().getParameters().get('retUrl'));
 	}
 
 	public PageReference save() {
 		populateAPIFields();
 		insert oc;
-		return new PageReference(ApexPages.CurrentPage().getParameters().get('retUrl'));
+		return new PageReference(EncodingUtil.urlDecode(ApexPages.CurrentPage().getParameters().get('retUrl'), 'UTF-8'));
 	}
 
 	private List<SelectOption> sortFieldList(Map<String, SObjectField> fieldMap) {
