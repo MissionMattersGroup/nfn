@@ -10,8 +10,7 @@ public class AddressLookupServiceTest {
 		paramMap.put('city', 'Arnold');
 		paramMap.put('state', 'MO');
 		paramMap.put('zip', '63010');
-		AddressLookupService svc = new AddressLookupService(paramMap);
-		Map<String, String> coordinatesMap = svc.getCoordinatesMap();
+		Map<String, String> coordinatesMap = AddressLookupService.getCoordinatesMap();
 		System.assert(String.isNotBlank(coordinatesMap.get('latitude')));
 		System.assert(String.isNotBlank(coordinatesMap.get('longitude')));
 		Test.stopTest();
@@ -22,10 +21,9 @@ public class AddressLookupServiceTest {
 		Test.startTest();
 		Test.setMock(HttpCalloutMock.class, new FccServiceMock());
 		Map<String, String> paramMap = new Map<String, String>();
-		AddressLookupService svc = new AddressLookupService(paramMap);
-		svc.coordinatesMap.put('latitude', '-90.426674');
-		svc.coordinatesMap.put('longitude', '38.448368');
-		String county = svc.getCountyByCoordinates();
+		AddressLookupService.coordinatesMap.put('latitude', '-90.426674');
+		AddressLookupService.coordinatesMap.put('longitude', '38.448368');
+		String county = AddressLookupService.getCountyByCoordinates();
 		System.assertEquals('Jefferson', county);
 		Test.stopTest();
 	}
