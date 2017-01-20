@@ -74,13 +74,13 @@
 										<apex:actionSupport event="onchange" reRender="form-container" action="{!rerender}"/>
 									</apex:selectList>
 								</apex:outputPanel>
-								<apex:outputPanel rendered="{!addressLookup.Postal_Code_Field__c != ''}" id="button-section" styleClass="row">
+								<apex:outputPanel id="button-section" styleClass="row">
 									<apex:outputPanel styleClass="col-lg-3"></apex:outputPanel>
-									<apex:outputPanel styleClass="col-lg-2">
+									<apex:outputPanel rendered="{!addressLookup.Postal_Code_Field__c != ''}" styleClass="col-lg-2">
 										<apex:commandButton styleClass="btn-success top-vert" value="Save" action="{!save}"/>
 									</apex:outputPanel>
-									<apex:outputPanel styleClass="col-lg-2"></apex:outputPanel>
-									<apex:outputPanel styleClass="col-lg-2">
+									<apex:outputPanel rendered="{!addressLookup.Postal_Code_Field__c != ''}" styleClass="col-lg-2"></apex:outputPanel>
+									<apex:outputPanel styleClass="{!IF(AddressLookup.Postal_Code_Field__c != '', 'col-lg-2', 'col-lg-6')}">
 										<apex:commandButton styleClass="btn-warning top-vert" value="Cancel" action="{!cancel}"/>
 									</apex:outputPanel>
 									<apex:outputPanel styleClass="col-lg-3"></apex:outputPanel>
