@@ -1,3 +1,4 @@
 debug/*
 config/*
 *.sublime-project
+deploy/*
