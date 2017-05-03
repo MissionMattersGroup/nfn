@@ -1,0 +1,114 @@
+<apex:page title="Create New Relationship" showHeader="true" standardController="Relationship__c" extensions="RelatrController">
+	<apex:form id="processingform">
+		<apex:pageBlock rendered="{!!readonly}">
+			<apex:pageBlockButtons >
+				<apex:commandButton action="{!save}" value="Save"/>
+                <apex:commandButton action="{!cancel}" value="Cancel"/>
+            </apex:pageBlockButtons>
+			<apex:pageBlockSection >
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Master Object" for="primary-lookup-type"/>
+					<apex:selectList multiselect="false" size="1" id="primary-lookup-type" value="{!primaryLookup}" readonly="{!readonly}">
+						<apex:selectOptions value="{!primaryLookupList}"/>
+						<apex:actionSupport action="{!rerender}" event="onchange" reRender="processingform"/>
+					</apex:selectList>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem rendered="{!primaryLookup != ''}">
+					<apex:outputLabel value="Related Object" for="secondary-lookup-type"/>
+					<apex:selectList multiselect="false" size="1" id="secondary-lookup-type" value="{!secondaryLookup}">
+						<apex:selectOptions value="{!secondaryLookupList}"/>
+						<apex:actionSupport action="{!rerender}" event="onchange" reRender="processingform"/>
+					</apex:selectList>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem rendered="{!primaryLookup != ''}">
+					<apex:outputLabel value="Master Relationship" for="primary-lookup"/>
+					<apex:inputField value="{!r[primaryLookup]}">
+						<apex:actionSupport action="{!populateTypeList}" event="onchange" reRender="processingform"/>
+					</apex:inputField>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem rendered="{!secondaryLookup != ''}">
+					<apex:outputLabel value="Related Object" for="secondary-lookup-type"/>
+					<apex:inputField value="{!r[secondaryLookup]}">
+						<apex:actionSupport action="{!setSecondarySo}" event="onchange" reRender="processingform"/>
+					</apex:inputField>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem rendered="{!AND(r[primaryLookup] != '', r[secondaryLookup] != '')}">
+					<apex:outputLabel value="Type" for="type-list"/>
+					<apex:selectList value="{!r.Type__c}" multiselect="false" size="1">
+						<apex:selectOptions value="{!typeList}" id="type-list"/>
+					</apex:selectList>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem rendered="{!AND(r[primaryLookup] != '', r[secondaryLookup] != '')}">
+					<apex:outputLabel value="Status" for="status-list"/>
+					<apex:inputField value="{!r.Status__c}" id="status-list"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem rendered="{!AND(r[primaryLookup] != '', r[secondaryLookup] != '')}">
+					<apex:outputLabel value="Relationship Start Date" for="start-date"/>
+					<apex:inputField value="{!r.Relationship_From__c}" id="start-date"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem rendered="{!AND(r[primaryLookup] != '', r[secondaryLookup] != '')}">
+					<apex:outputLabel value="Relationship End Date" for="end-date"/>
+					<apex:inputField value="{!r.Relationship_To__c}" id="end-date"/>
+				</apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+		</apex:pageBlock>
+
+		<apex:pageBlock rendered="{!readonly}">
+			<apex:pageBlockButtons >
+				<apex:commandButton action="{!save}" value="Save" rendered="{!editable}"/>
+				<apex:commandButton action="{!edit}" value="Edit" rendered="{!!editable}"/>
+                <apex:commandButton action="{!cancel}" value="Cancel"/>
+            </apex:pageBlockButtons>
+			<apex:pageBlockSection >
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Master Relationship" for="primary-lookup"/>
+					<apex:outputField value="{!r[primaryLookup]}" id="primary-lookup"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Related Object" for="secondary-lookup"/>
+					<apex:outputField value="{!r[secondaryLookup]}" id="secondary-lookup"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem rendered="{!editable}">
+					<apex:outputLabel value="Type" for="type-list"/>
+					<apex:inputField value="{!r.Type__c}" id="type-list"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem rendered="{!!editable}">
+					<apex:outputLabel value="Type" for="type-list-ro"/>
+					<apex:outputField value="{!r.Type__c}" id="type-list-ro"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem rendered="{!editable}">
+					<apex:outputLabel value="Status" for="status-list"/>
+					<apex:inputField value="{!r.Status__c}" id="status-list"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem rendered="{!!editable}">
+					<apex:outputLabel value="Status" for="status-list-ro"/>
+					<apex:outputField value="{!r.Status__c}" id="status-list-ro"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem rendered="{!editable}">
+					<apex:outputLabel value="Relationship Start Date" for="start-date"/>
+					<apex:inputField value="{!r.Relationship_From__c}" id="start-date"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem rendered="{!editable}">
+					<apex:outputLabel value="Relationship End Date" for="end-date"/>
+					<apex:inputField value="{!r.Relationship_To__c}" id="end-date"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem rendered="{!!editable}">
+					<apex:outputLabel value="Relationship Start Date" for="start-date-ro"/>
+					<apex:outputField value="{!r.Relationship_From__c}" id="start-date"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem rendered="{!!editable}">
+					<apex:outputLabel value="Relationship End Date" for="end-date-ro"/>
+					<apex:outputField value="{!r.Relationship_To__c}" id="end-date-ro"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Reciprocal Relationship" for="reciprocal-lookup"/>
+					<apex:outputField value="{!r.Reciprocal_Relationship__c}" id="reciprocal-lookup"/>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel value="Explanation" for="explanation"/>
+					<apex:outputField value="{!r.Explanation__c}" id="explanation"/>
+				</apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+		</apex:pageBlock>``
+	</apex:form>
+</apex:page>
