@@ -52,6 +52,7 @@ global class IntakeController {
 		for(Integer i=0; i<5; i++) pageDisplayMap.put(i, false);
         targetObjectMap = new Map<Integer, TargetObject>();
         fieldValueMapByOrderKeyMap = new Map<Integer, Map<String, Object>>();
+		retUrl = '';
 		if(ApexPages.currentPage().getParameters().containsKey('ContactId')) {
 			caregiver = [SELECT Id, Name, FirstName, LastName, AccountId FROM Contact WHERE Id = :ApexPages.currentPage().getParameters().get('ContactId')];
 			retUrl = '/' + caregiver.Id;
@@ -85,19 +86,42 @@ global class IntakeController {
 
     global PageReference processReferral() {
         List<SObject> newSObjectList = new List<SObject>();
-        for(Integer orderKey : targetObjectMap.keySet()) newSObjectList.add(targetObjectMap.get(orderKey).assignValues());
+		Address_History__c ah = new Address_History__c();
+        for(Integer orderKey : targetObjectMap.keySet()) {
+			TargetObject to = targetObjectMap.get(orderKey);
+			if(!to.sObjectType.equalsIgnoreCase('Address History')) {
+				newSObjectList.add(to.assignValues());
+			} else {
+				ah = (Address_History__c)to.assignValues();
+			}
+		}
         insert newSObjectList;
+		Account household;
         for(SObject so : newSObjectList) {
             if(so instanceof Contact) {
                 caregiver = (Contact)so;
 				retUrl = '/' + caregiver.Id;
                 referral.Caregiver__c = caregiver.Id;
+				caregiver.Referral__c = referral.Id;
+				ah.Caregiver__c = caregiver.Id;
+				ah.Current_Address__c = true;
             } else if (so instanceof Case__c) {
                 nfnCase = (Case__c)so;
                 referral.Case__c = nfnCase.Id;
-            }
+				nfnCase.Referral__c = referral.Id;
+            } else if(so instanceof Account) {
+				household = (Account)so;
+			}
         }
-        update referral;
+		List<SObject> secondaryNewSObjectList = new List<SObject>{(SObject)ah};
+		insert secondaryNewSObjectList;
+		List<SObject> sObjectUpdateList = new List<SObject>();
+		nfnCase.Caregiver__c = caregiver.Id;
+		caregiver.AccountId = household.Id;
+		sObjectUpdateList.add((SObject)caregiver);
+		sObjectUpdateList.add((SObject)referral);
+		sObjectUpdateList.add((SObject)nfnCase);
+		update sObjectUpdateList;
         pageDisplayMap.put(1, false);
         pageDisplayMap.put(2, true);
         return null;
