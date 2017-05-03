@@ -1,4 +1,4 @@
-<apex:page showHeader="true" sidebar="true" standardController="Object_Conversion__c" extensions="ObjectConversionController">
+<apex:page standardController="Object_Conversion__c" extensions="ObjectConversionController">
 	<script type="text/javascript">
 		function setNextFocus(elementId) {
 			document.getElementById(elementId).focus();
@@ -7,8 +7,7 @@
 	<apex:stylesheet value="{!URLFOR($Resource.ObjectConversion, 'ObjectConversion.css')}"/>
 	<apex:form >
 		<div style="width:800px;margin: 0 auto;">
-			<apex:pageBlock id="new_conversion">
-
+			<apex:pageBlock >
 				<apex:pageBlockSection >
 					<apex:selectList label="Conversion Types" value="{!oc.RecordTypeId}" multiselect="false" size="1">
 						<apex:selectOptions value="{!rtSelectOptionList}"/>
@@ -16,19 +15,19 @@
 				</apex:pageBlockSection>
 
 				<div style="width:1500px;">
-					<apex:pageBlockSection title="Add New Conversion" columns="1">
+					<apex:pageBlockSection title="Add New Conversion" columns="1" id="new_conversion">
 						<apex:pageBlockSection id="order">
 							<apex:inputField value="{!oc.Order__c}" label="Order"/>
 						</apex:pageBlockSection>
 
 						<apex:pageBlockSection id="target-object">
-							<apex:selectList id="target-object-input" label="Target Object" value="{!oc.Target_Object__c}" multiselect="false" size="1">
+							<apex:selectList label="Target Object" value="{!oc.Target_Object__c}" size="1" multiselect="false">
 								<apex:selectOptions value="{!targetObjectList}"/>
 								<apex:actionSupport event="onchange" action="{!populateTargetFieldList}" rerender="new_conversion"/>
 							</apex:selectList>
 						</apex:pageBlockSection>
 
-						<apex:pageBlockSection id="target-field" rendered="{!AND(oc.Target_Object__c != '', oc.Target_Object__c != '--None--')}">
+						<apex:pageBlockSection id="target-field" rendered="{!IF(AND(oc.Target_Object__c != '', oc.Target_Object__c != '--None--'), TRUE, FALSE)}">
 							<apex:selectList id="target-field-input" label="Target Field" value="{!oc.Target_Field__c}" multiselect="false" size="1">
 								<apex:selectOptions value="{!targetFieldList}"/>
 								<apex:actionSupport event="onchange" action="{!toggle}" rerender="new_conversion"/>
@@ -42,20 +41,20 @@
 							</apex:selectList>
 						</apex:pageBlockSection>
 
-						<apex:pageBlockSection id="source-field" rendered="{!IF(AND(oc.Source_Object__c != '', oc.Source_Object__c != '--None--', oc.Source_Object__c != null), TRUE, FALSE)}">
+						<apex:pageBlockSection id="source-field" rendered="{!IF(AND(oc.Source_Object__c != '', oc.Source_Object__c != '--None--', oc.Source_Object__c != null, oc.Source_Object__c != 'N/A'), TRUE, FALSE)}">
 							<apex:selectList id="source-field-input" label="Source Field" value="{!oc.Source_Field__c}" multiselect="false" size="1">
 								<apex:selectOptions value="{!sourceFieldList}"/>
 								<apex:actionSupport event="onchange" action="{!toggle}" rerender="new_conversion"/>
 							</apex:selectList>
 						</apex:pageBlockSection>
 
-						<apex:pageBlockSection id="target-value" rendered="{!IF(AND(oc.Target_Field__c != '', oc.Target_Field__c != '0', oc.Target_Field__c != null, oc.Target_Object__c != '--None--', oc.Target_Object__c != '', oc.Target_Object__c != null, OR(oc.Source_Object__c == '--None--', oc.Source_Object__c == '', oc.Source_Object__c == null)), TRUE, FALSE)}">
+						<apex:pageBlockSection id="target-value" rendered="{!IF(oc.Source_Object__c == 'N/A', TRUE, FALSE)}">
 							<apex:inputText id="target-value-input" label="Default Value" value="{!oc.Target_Value__c}">
 								<apex:actionSupport event="onchange" action="{!toggle}" rerender="new_conversion"/>
 							</apex:inputText>
 						</apex:pageBlockSection>
 
-						<apex:pageBlockSection id="is-required" rendered="{!IF(OR(oc.Source_Field__c != '', oc.Target_Value__c != ''), TRUE, FALSE)}">
+						<apex:pageBlockSection id="is-required" rendered="{!IF(AND(oc.Source_Object__c != 'N/A', OR(oc.Source_Field__c != '', oc.Target_Value__c != '')), TRUE, FALSE)}">
 							<apex:inputField id="is-required-input" label="Required Field" value="{!oc.Required__c}">
 								<apex:actionSupport event="onchange" action="{!toggle}" rerender="new_conversion"/>
 							</apex:inputField>
@@ -67,15 +66,14 @@
 							</apex:inputText>
 						</apex:pageBlockSection>
 
+						<apex:pageBlockSection id="save-section" rendered="{!IF(OR(oc.Source_Field__c != '', oc.Target_Value__c != ''), TRUE, FALSE)}">
+							<apex:pageBlockSectionItem >
+								<apex:commandButton action="{!save}" value="Save"/>
+								<apex:commandButton action="{!saveAndNew}" value="Save And New"/>
+							</apex:pageBlockSectionItem>
+						</apex:pageBlockSection>
 					</apex:pageBlockSection>
 				</div>
-
-				<apex:pageBlockButtons location="bottom">
-					<apex:commandButton action="{!save}" value="Save" rendered="{!OR(oc.Source_Field__c != '', oc.Target_Value__c != '')}"/>
-					<apex:commandButton action="{!saveAndNew}" value="Save And New" rendered="{!OR(oc.Source_Field__c != '', oc.Target_Value__c != '')}"/>
-					<apex:commandButton action="{!cancel}" value="Cancel"/>
-				</apex:pageBlockButtons>
-
 			</apex:pageBlock>
 		</div>
 	</apex:form>

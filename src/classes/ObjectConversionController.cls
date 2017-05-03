@@ -34,7 +34,7 @@ public class ObjectConversionController {
 	}
 
 	private void populateObjectLists() {
-		sourceObjectList = new List<SelectOption>{new SelectOption('0', '--Select--')};
+		sourceObjectList = new List<SelectOption>{new SelectOption('0', '--Select--'), new SelectOption('N/A', 'Provide Default Value')};
 		targetObjectList = new List<SelectOption>{new SelectOption('0', '--Select--')};
 		Map<String, Schema.SObjectType> objectMap = Schema.getGlobalDescribe();
 		Map<String, String> objectNameByLabelMap = new Map<String, String>();
@@ -68,10 +68,15 @@ public class ObjectConversionController {
 
 	public void populateSourceFieldList() {
 		sourceFieldList = new List<SelectOption>{new SelectOption('0', '--Select--')};
-		if(String.isNotBlank(oc.Source_Object__c) && oc.Source_Object__c != '0') {
+		if(String.isNotBlank(oc.Source_Object__c) && oc.Source_Object__c != '0' && oc.Source_Object__c != 'N/A') {
 			sourceFieldList.addAll(sortFieldList(sObjectByLabelMap.get(oc.Source_Object__c).getDescribe().fields.getMap()));
-		} else {
-			sourceObjectList.add(new SelectOption('Set Default Value', 'Set Default Value'));
+		} else if(oc.Source_Object__c == 'N/A') {
+			if(oc.Target_Field__c == 'Record Type Name') {
+				for(RecordType rt : [SELECT Id, Name FROM RecordType WHERE IsActive = TRUE AND SObjectType = :sObjectByLabelMap.get(oc.Target_Object__c).getDescribe().getName() ORDER BY Name]) {
+					sourceFieldList.add(new SelectOption(rt.Name, rt.Name));
+				}
+			}
+			oc.Source_Field__c = oc.Source_Object__c;
 		}
 	}
 
@@ -83,7 +88,7 @@ public class ObjectConversionController {
 				break;
 			}
 		}
-		if(String.isNotBlank(oc.Source_Object__c)) {
+		if(String.isNotBlank(oc.Source_Object__c) && oc.Source_Object__c != 'N/A') {
 			oc.Source_Object_API_Name__c = sObjectByLabelMap.get(oc.Source_Object__c).getDescribe().getName();
 			for(Schema.SObjectField field : sObjectByLabelMap.get(oc.Source_Object__c).getDescribe().fields.getMap().values()) {
 				if(field.getDescribe().getLabel() == oc.Source_Field__c) {
@@ -108,7 +113,7 @@ public class ObjectConversionController {
 	public PageReference save() {
 		populateAPIFields();
 		insert oc;
-		return new PageReference(EncodingUtil.urlDecode(ApexPages.CurrentPage().getParameters().get('retUrl'), 'UTF-8'));
+		return new PageReference(ApexPages.CurrentPage().getParameters().get('retUrl'));
 	}
 
 	private List<SelectOption> sortFieldList(Map<String, SObjectField> fieldMap) {
@@ -120,6 +125,7 @@ public class ObjectConversionController {
 		List<String> sortedLabelList = new List<String>(fieldNameByLabelMap.keySet());
 		sortedLabelList.sort();
 		for(String fieldLabel : sortedLabelList) {
+			fieldLabel = fieldLabel.equalsIgnoreCase('Record Type ID') ? 'Record Type Name' : fieldLabel;
 			sortedList.add(new SelectOption(fieldLabel, fieldLabel));
 		}
 		return sortedList;
@@ -141,7 +147,7 @@ public class ObjectConversionController {
 				}
 			}
 		}
-		if(String.isNotBlank(oc.Source_Field__c) && String.isBlank(oc.Source_Field_API_Name__c)) {
+		if(String.isNotBlank(oc.Source_Field__c) && String.isBlank(oc.Source_Field_API_Name__c) && oc.Source_Field__c != 'N/A') {
 			for(Schema.SObjectField dfr : sObjectByLabelMap.get(oc.Source_Object__c).getDescribe().fields.getMap().values()) {
 				if(dfr.getDescribe().getLabel() == oc.Source_Field__c) {
 					oc.Source_Field_API_Name__c = dfr.getDescribe().getName();
