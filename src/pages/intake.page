@@ -34,7 +34,7 @@
 							<h1 style="text-align:center;margin-bottom:30px;">Referral Process<br/></h1>
 							<ul style="text-align:left;margin-top:30px;">
 								<li style="list-style-type:none;"><h4><vs:glyph icon="circle-arrow-right"/> &nbsp; Provide Missing Data on Referral Record</h4></li>
-								<li style="list-style-type:none;"><h4><vs:glyph icon="unchecked"/> &nbsp; Create Client Contact, and Infant Case</h4></li>
+								<li style="list-style-type:none;"><h4><vs:glyph icon="unchecked"/> &nbsp; Create Caregiver Contact, and Infant Case</h4></li>
 							</ul>
 						</apex:outputPanel>
 						<apex:outputPanel layout="block" styleClass="col-md-2"></apex:outputPanel>
@@ -81,7 +81,7 @@
 							<h1 style="text-align:center;margin-bottom:30px;">Referral Process<br/></h1>
 							<ul style="text-align:left;margin-top:30px;">
 								<li style="list-style-type:none;"><h4><span style="color:green;"><vs:glyph icon="check"/></span> &nbsp; Referral Record Complete</h4></li>
-								<li style="list-style-type:none;"><h4><vs:glyph icon="circle-arrow-right"/> &nbsp; Create Client Contact, and Infant Case</h4></li>
+								<li style="list-style-type:none;"><h4><vs:glyph icon="circle-arrow-right"/> &nbsp; Create Caregiver Contact, and Infant Case</h4></li>
 							</ul>
 						</apex:outputPanel>
 						<apex:outputPanel layout="block" styleClass="col-md-2"></apex:outputPanel>
@@ -106,7 +106,7 @@
 							<h1 style="text-align:center;margin-bottom:30px;">Referral Process<br/></h1>
 							<ul style="text-align:left;margin-top:30px;">
 								<li style="list-style-type:none;"><h4><span style="color:green;"><vs:glyph icon="check"/></span> &nbsp; Referral Record Complete</h4></li>
-								<li style="list-style-type:none;"><h4><span style="color:green;"><vs:glyph icon="check"/></span> &nbsp; Create Client Contact, and Infant Case</h4></li>
+								<li style="list-style-type:none;"><h4><span style="color:green;"><vs:glyph icon="check"/></span> &nbsp; Create Caregiver Contact, and Infant Case</h4></li>
 							</ul>
 						</apex:outputPanel>
 						<apex:outputPanel layout="block" styleClass="col-md-2"></apex:outputPanel>
@@ -117,7 +117,7 @@
 						<apex:outputPanel layout="block" styleClass="col-md-4"></apex:outputPanel>
 						<apex:outputPanel layout="block" styleClass="col-md-4 text-center">
 							<input type="button" style="width:320px; margin-bottom:16px;" class="btn btn-lg btn-primary" onclick="window.location='{!baseurl}/{!referral.Id}';" value="Return to the Referral record"/>
-							<input type="button" style="width:320px; margin-bottom:16px;" class="btn btn-lg btn-success" onclick="window.location='{!baseurl}/{!referral.Client__c}';" value="View the Client record"/>
+							<input type="button" style="width:320px; margin-bottom:16px;" class="btn btn-lg btn-success" onclick="window.location='{!baseurl}/{!referral.Caregiver__c}';" value="View the Caregiver record"/>
 							<input type="button" style="width:320px; margin-bottom:16px;" class="btn btn-lg btn-success" onclick="window.location='{!baseurl}/{!referral.Case__c}';" value="View the Case record"/>
 						</apex:outputPanel>
 						<apex:outputPanel layout="block" styleClass="col-md-3"></apex:outputPanel>
@@ -129,7 +129,7 @@
 			<vs:modal title="Process Referral Record" id="ConfirmReferral">
 				<apex:actionRegion id="ConfirmReferralRegion">
 					<apex:pageBlock mode="maindetail">
-			   			<p>Are you sure you would like to create {!referral.Client_First_Name__c} {!referral.Client_Last_Name__c} as a client?</p>
+			   			<p>Are you sure you would like to create {!referral.Client_First_Name__c} {!referral.Client_Last_Name__c} as a Caregiver?</p>
 				 	</apex:pageBlock>
 				 	<apex:outputPanel styleClass="modal-footer" layout="block">
 			   			<apex:commandButton value="Close" styleClass="btn-warning" html-data-dismiss="modal"/>
