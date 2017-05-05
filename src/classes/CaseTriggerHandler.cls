@@ -34,8 +34,8 @@ public class CaseTriggerHandler {
 			caseId = caseId.substring(0, 15);
 			String caseName = caseMap.get(cId).Name;
 			String placeholderName = '';
-			if(r.Explanation__c.contains('[autoname]')) {
-				r.Explanation__c = r.Explanation__c.replace('[autoname]', caseName);
+			if(r.Explanation__c.contains('[Autoname]')) {
+				r.Explanation__c = r.Explanation__c.replace('[Autoname]', caseName);
 			} else if(r.Explanation__c.contains(caseId)) {
 				r.Explanation__c = r.Explanation__c.replace(caseId, caseName);
 			}
@@ -51,17 +51,20 @@ public class CaseTriggerHandler {
 		Map<Id, Contact> caregiverMap = new Map<Id, Contact>([SELECT Id, Name, AccountId, Account.Name, Caregiver_Relationship_to_Infant__c FROM Contact WHERE Id IN :contactIdSet]);
 		List<Relationship__c> relationshipList = new List<Relationship__c>();
 		for(Case__c c : caseWithCareGiverList) {
+			Contact caregiver = caregiverMap.get(c.Caregiver__c);
 			Relationship__c r = new Relationship__c();
 			r.Case_Related__c = c.Id;
 			r.Contact__c = c.Caregiver__c;
-			r.Type__c = caregiverMap.get(c.Caregiver__c).Caregiver_Relationship_to_Infant__c;
-			r.Explanation__c = caregiverMap.get(c.Caregiver__c).Name + ' is the ' + r.Type__c + ' of ' + c.Name;
+			r.Status__c = 'Current';
+			r.Type__c = caregiver.Caregiver_Relationship_to_Infant__c;
+			r.Explanation__c = caregiver.Name + ' is the ' + r.Type__c + ' of ' + c.Name;
 			relationshipList.add(r);
 			r = new Relationship__c();
 			r.Case__c = c.Id;
-			r.Account_Related__c = caregiverMap.get(c.Caregiver__c).AccountId;
+			r.Account_Related__c = caregiver.AccountId;
 			r.Type__c = 'Household Member';
-			r.Explanation__c = c.Name + ' is the ' + r.Type__c + ' of ' + caregiverMap.get(c.Caregiver__c).Account.Name;
+			r.Status__c = 'Current';
+			r.Explanation__c = c.Name + ' is the ' + r.Type__c + ' of ' + caregiver.Account.Name;
 			relationshipList.add(r);
 		}
 		insert relationshipList;
