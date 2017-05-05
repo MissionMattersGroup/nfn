@@ -113,8 +113,13 @@ global class IntakeController {
 				household = (Account)so;
 			}
         }
-		List<SObject> secondaryNewSObjectList = new List<SObject>{(SObject)ah};
-		insert secondaryNewSObjectList;
+		insert ah;
+		List<Tag__c> newReferralReasonList = new List<Tag__c>();
+		for(Tag__c t : [SELECT Tag_Name__c, Contact__c FROM Tag__c WHERE Referral__c = :referral.Id]) {
+			Tag__c contactTag = new Tag__c(Tag_Name__c = t.Tag_Name__c, Contact__c = caregiver.Id);
+			newReferralReasonList.add(contactTag);
+		}
+		insert newReferralReasonList;
 		List<SObject> sObjectUpdateList = new List<SObject>();
 		nfnCase.Caregiver__c = caregiver.Id;
 		caregiver.AccountId = household.Id;
