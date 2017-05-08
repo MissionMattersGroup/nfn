@@ -27,7 +27,7 @@
 					</apex:inputField>
 				</apex:pageBlockSectionItem>
 				<apex:pageBlockSectionItem rendered="{!secondaryLookup != ''}">
-					<apex:outputLabel value="Related Object" for="secondary-lookup-type"/>
+					<apex:outputLabel value="Related Relationship" for="secondary-lookup-type"/>
 					<apex:inputField value="{!r[secondaryLookup]}">
 						<apex:actionSupport action="{!setSecondarySo}" event="onchange" reRender="processingform"/>
 					</apex:inputField>
