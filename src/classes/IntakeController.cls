@@ -132,6 +132,16 @@ global class IntakeController {
         return null;
     }
 
+	private void addCaseToAuthorizations() {
+		List<Authorization__c> authList = [SELECT Id, Referral__c, Case__c FROM Authorization__c WHERE Referral__c = :referral.Id];
+		for(Authorization__c a : authList) {
+			a.Case__c = nfnCase.Id;
+		}
+		if(!authList.isNotEmpty() {
+			update authList;
+		}
+	}
+
     @RemoteAction
     global static PageReference goto(String returnTo) {
         return new PageReference('/' + returnTo);
