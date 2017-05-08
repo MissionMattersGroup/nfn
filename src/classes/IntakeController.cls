@@ -119,6 +119,7 @@ global class IntakeController {
 			Tag__c contactTag = new Tag__c(Tag_Name__c = t.Tag_Name__c, Contact__c = caregiver.Id);
 			newReferralReasonList.add(contactTag);
 		}
+		addCaseToAuthorizations();
 		insert newReferralReasonList;
 		List<SObject> sObjectUpdateList = new List<SObject>();
 		nfnCase.Caregiver__c = caregiver.Id;
@@ -131,6 +132,16 @@ global class IntakeController {
         pageDisplayMap.put(2, true);
         return null;
     }
+
+	private void addCaseToAuthorizations() {
+		List<Authorization__c> authList = [SELECT Id, Referral__c, Case__c FROM Authorization__c WHERE Referral__c = :referral.Id];
+		for(Authorization__c a : authList) {
+			a.Case__c = nfnCase.Id;
+		}
+		if(!authList.isEmpty()) {
+			update authList;
+		}
+	}
 
     @RemoteAction
     global static PageReference goto(String returnTo) {
