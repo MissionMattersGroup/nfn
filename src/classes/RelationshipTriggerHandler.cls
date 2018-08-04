@@ -10,14 +10,14 @@ public class RelationshipTriggerHandler {
 				relationshipWithNoRecipIdSet.add(r.Id);
 			}
 		}
-		if(!relationshipWithNoRecipIdSet.isEmpty()) createReciprocalRelationships(relationshipWithNoRecipIdSet, false);
+		if(!relationshipWithNoRecipIdSet.isEmpty()) createReciprocalRelationships(relationshipWithNoRecipIdSet, true);
 	}
 
 	public static void onBeforeUpdate(List<Relationship__c> newList, Map<Id, Relationship__c> oldMap) {
 		List<Id> recipIdList = new List<Id>();
 		Set<Id> relationshipWithNoRecipIdSet = new Set<Id>();
 		for(Relationship__c r : newList) {
-			if(r.Type__c != oldMap.get(r.Id).Type__c) {
+			if(TriggerUtility.hasValueChanged(r, oldMap.get(r.Id), 'Type__c')) {
 				relationshipWithNoRecipIdSet.add(r.Id);
 				recipIdList.add(r.Reciprocal_Relationship__c);
 			}
@@ -26,6 +26,30 @@ public class RelationshipTriggerHandler {
 			delete [SELECT Id FROM Relationship__c WHERE Id IN :recipIdList];
 			createReciprocalRelationships(relationshipWithNoRecipIdSet, false);
 		}
+	}
+
+	public static void onAfterUpdate(List<Relationship__c> newList, Map<Id, Relationship__c> oldMap) {
+		Map<Id, String> tenseStringByRecipIdMap = new Map<Id, String>();
+		for(Relationship__c r : newList) {
+			if(TriggerUtility.hasValueChanged(r, oldMap.get(r.Id), 'Status__c')) {
+				tenseStringByRecipIdMap.put(r.Reciprocal_Relationship__c, r.Status__c);
+			}
+		}
+		if(!tenseStringByRecipIdMap.isEmpty()) {
+			updateExplanationTense(tenseStringByRecipIdMap);
+		}
+	}
+
+	private static void updateExplanationTense(Map<Id, String> tenseStringByRecipIdMap) {
+		List<Relationship__c> recipList = [SELECT Id, Status__c, Explanation__c FROM Relationship__c WHERE Id IN :tenseStringByRecipIdMap.keyset()];
+		for(Relationship__c recip : recipList) {
+			recip.Status__c = tenseStringByRecipIdMap.get(recip.Id);
+			String expl = recip.Status__c == 'Former'
+							? recip.Explanation__c.replace(' is the ', ' was the ')
+							: recip.Explanation__c.replace(' was the ', ' is the ');
+			recip.Explanation__c = expl;
+		}
+		update recipList;
 	}
 
 	private static void createReciprocalRelationships(Set<Id> relationshipIdSet, Boolean doUpdate) {
@@ -103,10 +127,11 @@ public class RelationshipTriggerHandler {
 			recip.Relationship_From__c = r.Relationship_From__c;
 			recip.Relationship_To__c = r.Relationship_To__c;
 			recip.Status__c = r.Status__c;
-			List<String> explanationList = r.Explanation__c.split(' is the ', 2);
+			String tense = r.Status__c == 'Former' ? ' was the ' : ' is the ';
+			List<String> explanationList = r.Explanation__c.split(tense);
 			String secondaryName = explanationList[0];
 			String primaryName = explanationList[1].split(r.Type__c + ' of ', 2)[1];
-			recip.Explanation__c = primaryName + ' is the ' + recip.Type__c + ' of ' + secondaryName;
+			recip.Explanation__c = primaryName + tense + recip.Type__c + ' of ' + secondaryName;
 			reciprocalRelationshipList.add(recip);
 		}
 		if(!reciprocalRelationshipList.isEmpty()) insert reciprocalRelationshipList;

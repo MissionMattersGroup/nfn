@@ -107,7 +107,8 @@ global class RelatrController {
 	public PageReference save() {
 		String primaryName = String.valueOf(primarySo.get('Name'));
 		String secondaryName = String.valueOf(secondarySo.get('Name'));
-		r.Explanation__c = String.valueOf(primarySo.get('Name')) + ' is the ' + r.Type__c + ' of ' + String.valueOf(secondarySo.get('Name'));
+		String tense = r.Status__c == 'Former' ? ' was the ' : ' is the ';
+		r.Explanation__c = String.valueOf(primarySo.get('Name')) + tense + r.Type__c + ' of ' + String.valueOf(secondarySo.get('Name'));
 		if(readonly) {
 			update r;
 		} else {
